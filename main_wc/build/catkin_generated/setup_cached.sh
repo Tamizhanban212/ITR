@@ -8,6 +8,9 @@
 
 # modified environment variables
 export CMAKE_PREFIX_PATH="/home/tamizhanban/Documents/ITR/main_wc/devel:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH="/home/tamizhanban/Documents/ITR/main_wc/devel/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/home/tamizhanban/Documents/ITR/main_wc/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD='/home/tamizhanban/Documents/ITR/main_wc/build'
-export ROSLISP_PACKAGE_DIRECTORIES='/home/tamizhanban/Documents/ITR/main_wc/devel/share/common-lisp'
+export PYTHONPATH="/home/tamizhanban/Documents/ITR/main_wc/devel/lib/python3/dist-packages:$PYTHONPATH"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/tamizhanban/Documents/ITR/main_wc/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
 export ROS_PACKAGE_PATH="/home/tamizhanban/Documents/ITR/main_wc/src:$ROS_PACKAGE_PATH"

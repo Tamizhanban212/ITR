@@ -131,6 +131,17 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/tamizhanban/Documents/ITR/main_wc/build/gtest/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator/open_manipulator/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator_simulations/open_manipulator_simulations/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/publish_srvs/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator_msgs/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator/open_manipulator_libs/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator/open_manipulator_control_gui/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator/open_manipulator_controller/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator/open_manipulator_teleop/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator_dependencies/roboticsgroup_gazebo_plugins/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator/open_manipulator_description/cmake_install.cmake")
+  include("/home/tamizhanban/Documents/ITR/main_wc/build/open_manipulator_simulations/open_manipulator_gazebo/cmake_install.cmake")
 
 endif()
 
