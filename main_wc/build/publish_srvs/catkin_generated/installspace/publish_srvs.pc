@@ -1,8 +1,0 @@
-prefix=/home/tamizhanban/Documents/ITR/main_wc/install
-
-Name: publish_srvs
-Description: Description of publish_srvs
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
