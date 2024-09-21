@@ -1,0 +1,2 @@
+ITR-OWL/owl_robot_description
+-DCATKIN_DEVEL_PREFIX=/home/tamizhanban/Documents/ITR/owl/devel -DCMAKE_INSTALL_PREFIX=/home/tamizhanban/Documents/ITR/owl/install -G Unix Makefiles
