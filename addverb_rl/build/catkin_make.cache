@@ -1,2 +1,0 @@
-Object_Impedance_Control_Dual_Arm_Addverb-main/heal_left:Object_Impedance_Control_Dual_Arm_Addverb-main/heal_left_and_right_independent:Object_Impedance_Control_Dual_Arm_Addverb-main/heal_right
--DCATKIN_DEVEL_PREFIX=/home/aarav/ITR/addverb_rl/devel -DCMAKE_INSTALL_PREFIX=/home/aarav/ITR/addverb_rl/install -G Unix Makefiles
