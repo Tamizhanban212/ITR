@@ -1,3 +1,0 @@
-[submodule "/home/tamizhanban/Documents/ITR/rl_ws/src/drl_grasping"]
-	path = /home/tamizhanban/Documents/ITR/rl_ws/src/drl_grasping
-	url = git@github.com:AndrejOrsula/drl_grasping.git
