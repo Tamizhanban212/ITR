@@ -1,8 +1,0 @@
-prefix=/home/tamizhanban/Documents/ITR/owl/install
-
-Name: owl_perception
-Description: Description of owl_perception
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

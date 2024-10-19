@@ -1,8 +1,0 @@
-prefix=/home/tamizhanban/Documents/ITR/owl/devel
-
-Name: moveit_ros_warehouse
-Description: Description of moveit_ros_warehouse
-Version: 1.1.15
-Cflags: -I/home/tamizhanban/Documents/ITR/owl/src/moveit/moveit_ros/warehouse/warehouse/include
-Libs: -L${prefix}/lib -lmoveit_warehouse
-Requires: moveit_ros_planning warehouse_ros roscpp

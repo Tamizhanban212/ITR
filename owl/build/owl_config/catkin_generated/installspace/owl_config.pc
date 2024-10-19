@@ -1,8 +1,0 @@
-prefix=/home/tamizhanban/Documents/ITR/owl/install
-
-Name: owl_config
-Description: Description of owl_config
-Version: 0.3.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

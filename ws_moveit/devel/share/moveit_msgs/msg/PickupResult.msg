@@ -1,1 +1,0 @@
-/home/tamizhanban/Documents/ITR/ws_moveit/devel/.private/moveit_msgs/share/moveit_msgs/msg/PickupResult.msg

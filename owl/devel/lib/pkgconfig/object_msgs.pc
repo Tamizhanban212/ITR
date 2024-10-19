@@ -1,8 +1,0 @@
-prefix=/home/tamizhanban/Documents/ITR/owl/devel
-
-Name: object_msgs
-Description: Description of object_msgs
-Version: 1.0.0
-Cflags: -I/home/tamizhanban/Documents/ITR/owl/devel/include
-Libs: -L${prefix}/lib 
-Requires: object_recognition_msgs geometry_msgs shape_msgs std_msgs message_runtime

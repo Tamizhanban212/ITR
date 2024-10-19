@@ -1,2 +1,0 @@
-moveit_resources/moveit_resources
-/home/tamizhanban/Documents/ITR/ws_moveit/devel/.private/moveit_resources/cmake.lock /home/tamizhanban/Documents/ITR/ws_moveit/devel/./cmake.lock
