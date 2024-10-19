@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: owl_robot_description
+    relative_path: urdf/robot.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/owl_robot.srdf
+  CONFIG:
+    author_name: Tamizhanban A G
+    author_email: tamizhanbanag@gmail.com
+    generated_timestamp: 1726914978

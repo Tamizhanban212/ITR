@@ -7,7 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/tamizhanban/Documents/ITR/owl/devel:$CMAKE_PREFIX_PATH"
 export PWD='/home/tamizhanban/Documents/ITR/owl/build'
-export ROSLISP_PACKAGE_DIRECTORIES="/home/tamizhanban/Documents/ITR/owl/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/tamizhanban/Documents/ITR/owl/src:$ROS_PACKAGE_PATH"

@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG  -rdynamic CMakeFiles/test_basics.dir/test_basics.cpp.o  -o /home/tamizhanban/Documents/ITR/owl/devel/lib/geometric_shapes/test_basics   -L/home/tamizhanban/Documents/ITR/owl/build/gtest  -Wl,-rpath,/home/tamizhanban/Documents/ITR/owl/build/gtest:/home/tamizhanban/Documents/ITR/owl/build/gtest/lib ../../gtest/lib/libgtest.so -lpthread 

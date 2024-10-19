@@ -1,0 +1,5 @@
+Symlinking /home/tamizhanban/Documents/ITR/ws_moveit/devel/lib/libgeometric_shapes.so
+Symlinking /home/tamizhanban/Documents/ITR/ws_moveit/devel/lib/libgeometric_shapes.so.0.7.7
+Symlinking /home/tamizhanban/Documents/ITR/ws_moveit/devel/lib/pkgconfig/geometric_shapes.pc
+Symlinking /home/tamizhanban/Documents/ITR/ws_moveit/devel/share/geometric_shapes/cmake/geometric_shapesConfig-version.cmake
+Symlinking /home/tamizhanban/Documents/ITR/ws_moveit/devel/share/geometric_shapes/cmake/geometric_shapesConfig.cmake
