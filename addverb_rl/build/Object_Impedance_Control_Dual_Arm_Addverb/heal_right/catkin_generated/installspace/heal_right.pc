@@ -1,8 +1,0 @@
-prefix=/home/aarav/ITR/addverb_rl/install
-
-Name: heal_right
-Description: Description of heal_right
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib -lheal_right
-Requires: roscpp rospy std_msgs
