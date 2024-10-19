@@ -131,9 +131,9 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/aarav/ITR/addverb_rl/build/gtest/cmake_install.cmake")
-  include("/home/aarav/ITR/addverb_rl/build/Object_Impedance_Control_Dual_Arm_Addverb/heal_left/cmake_install.cmake")
-  include("/home/aarav/ITR/addverb_rl/build/Object_Impedance_Control_Dual_Arm_Addverb/heal_left_and_right_independent/cmake_install.cmake")
-  include("/home/aarav/ITR/addverb_rl/build/Object_Impedance_Control_Dual_Arm_Addverb/heal_right/cmake_install.cmake")
+  include("/home/aarav/ITR/addverb_rl/build/Object_Impedance_Control_Dual_Arm_Addverb-main/heal_left/cmake_install.cmake")
+  include("/home/aarav/ITR/addverb_rl/build/Object_Impedance_Control_Dual_Arm_Addverb-main/heal_left_and_right_independent/cmake_install.cmake")
+  include("/home/aarav/ITR/addverb_rl/build/Object_Impedance_Control_Dual_Arm_Addverb-main/heal_right/cmake_install.cmake")
 
 endif()
 
