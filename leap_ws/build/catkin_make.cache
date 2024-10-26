@@ -1,0 +1,2 @@
+gesture
+-DCATKIN_DEVEL_PREFIX=/home/tamizhanban/Documents/ITR/leap_ws/devel -DCMAKE_INSTALL_PREFIX=/home/tamizhanban/Documents/ITR/leap_ws/install -G Unix Makefiles

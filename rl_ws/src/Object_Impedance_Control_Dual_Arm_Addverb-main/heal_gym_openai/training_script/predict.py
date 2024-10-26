@@ -10,7 +10,7 @@ model = PPO.load("Heal")
 
 # Define the target joint states: 1st joint to 90 degrees (pi/2), 2nd joint to -90 degrees (-pi/2)
 # Remaining joints remain at zero
-target_joint_states = np.array([np.pi/2, -np.pi/2, 0.0, 0.0, 0.0, 0.0])
+target_joint_states = np.array([0.0, 1.5, 1.5, 0.0, 0, 0])
 
 # Reset the environment and extract the observation
 obs, _ = env.reset()
@@ -28,6 +28,7 @@ while True:
 
     # Access the Mujoco data using env.unwrapped
     current_joint_states = env.unwrapped.data.qpos[:6]
+    print(current_joint_states)
     if np.linalg.norm(current_joint_states - target_joint_states) < 0.05:
         print("Reached the target joint states.")
         break
