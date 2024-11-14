@@ -114,6 +114,7 @@
 #     def _get_info(self):
 #         return {}
 
+
 import numpy as np
 import os
 from gymnasium import utils
@@ -123,134 +124,161 @@ from configparser import ConfigParser
 
 class HealEnv(MujocoEnv):
     metadata = {
-        "render_modes": ["human", "rgb_array", "depth_array"],
+        "render_modes": [
+            "human",
+            "rgb_array",
+            "depth_array",
+        ],
         "render_fps": 100,
     }
-    
+
     def __init__(self, render_mode="human"):
         self.render_mode = render_mode
         configur = ConfigParser()
         path = os.path.dirname(os.path.abspath(__file__))
-        configPath = os.path.join(path, "config.ini")
-        configur.read(configPath)
-        rend_fps = configur.getint('Default', 'render_fps')
-        rend_path = configur.get('Default', 'path')
+        configur.read(os.path.join(path, "config.ini"))
+
         self.frame_skip = configur.getint('Default', 'skip_frame')
-        self.observation_space = Box(low=-np.inf, high=np.inf, shape=(18,), dtype=np.float64)
-        MujocoEnv.__init__(self, os.path.abspath(os.path.join(path, rend_path)), self.frame_skip, self.observation_space, render_mode=render_mode)
-
-        # Disable gravity by setting it to zero for faster RL training
-        self.model.opt.gravity[:] = 0
-
-        self.step_number = 0
         self.episode_len = configur.getint('Default', 'episode_len')
-        self.init_pos = np.zeros(6)
-        self.init_vel = np.zeros(6)
-        
-        # Define a time-dependent trajectory as a list of joint positions over time
-        self.trajectory = self.generate_trajectory()
-        
-        self.min_action = configur.getfloat('Default', 'min_action')
-        self.max_action = configur.getfloat('Default', 'max_action')
 
-        action = np.zeros(6)
-        self.do_simulation(action, self.frame_skip)
+        # Initialize MuJoCo environment
+        MujocoEnv.__init__(self, os.path.abspath(os.path.join(path, configur.get('Default', 'path'))),
+                           self.frame_skip, observation_space=None, render_mode=render_mode)
+
+        # Disable gravity
+        self.model.opt.gravity[:] = 0  # Set gravity to zero
+
+        # Set up observation and action spaces
+        obs_dim = self.model.nq + self.model.nv + self.model.nv
+        self.observation_space = Box(
+            low=-np.inf,
+            high=np.inf,
+            shape=(obs_dim,),
+            dtype=np.float64
+        )
+
+        min_action = configur.getfloat('Default', 'min_action')
+        max_action = configur.getfloat('Default', 'max_action')
         bounds = self.model.actuator_ctrlrange.copy().astype(np.float64)
         low, high = bounds.T
-        for i in range(6):
-            low[i] = self.min_action
-            high[i] = self.max_action
-
+        low.fill(min_action)
+        high.fill(max_action)
         self.action_space = Box(low=low, high=high, dtype=np.float64)
 
+        # Initialize state variables
+        self.step_number = 0
+        self.initial_ee_height = None
+        self.initial_joint_positions = None
+
+        # Initialize with proper dimensions
+        self.init_pos = np.zeros(self.model.nq)
+        self.init_vel = np.zeros(self.model.nv)
+
+        # Do initial simulation step
+        self.do_simulation(np.zeros(self.model.nu), self.frame_skip)
+
+        # Store initial positions as targets
+        self.initial_ee_height = self.data.body("end_effector").xpos[2]
+        self.initial_joint_positions = self.data.qpos.copy()
+
+        # Define parameters for the circular path
+        self.path_radius = 0.8  # Define the radius of the circle
+        self.num_points = 2000  # Number of points along the path
+
+        # Generate the circular trajectory path
+        self.path = self.generate_circular_path(self.path_radius, self.num_points)
+
+        self.num_points = len(self.path)  # Update number of points to be the length of the path
+        self.current_target_idx = 0
+
+    def generate_circular_path(self, radius, num_points):
+        """Generates a circular path in the XY plane with a constant height."""
+        t_values = np.linspace(0, 2 * np.pi, num_points)
+        path = np.array([
+            [radius * np.cos(t), radius * np.sin(t), self.initial_ee_height]  # Z-coordinate stays constant
+            for t in t_values
+        ])
+        return path
+
     def _get_obs(self):
-        observation = np.zeros(18)
-        for i in range(6):
-            observation[i] = self.data.joint("joint_" + str(i+1)).qpos
-            observation[6+i] = self.data.joint("joint_" + str(i+1)).qvel
-            observation[12+i] = self.data.joint("joint_" + str(i+1)).qacc
-        return observation
+        """Returns the current state of the system, including joint positions and velocities."""
+        obs = np.concatenate([self.data.qpos, self.data.qvel, self.data.qacc])
+        return obs
 
-    def generate_trajectory(self):
-        """Generates a straight-line trajectory within the C-space."""
-        start_position = self.init_pos  # Starting joint position (e.g., all zeros)
-        end_position = np.array([0.5, 0.5, 0.0, 0.0, 0.5, 0.0])  # Target end position in C-space
-        num_steps = self.episode_len
-
-        # Create a straight line trajectory in joint space by interpolating between start and end positions
-        trajectory = []
-        for t in range(num_steps):
-            alpha = t / (num_steps - 1)  # Interpolation factor from 0 to 1
-            target_position = (1 - alpha) * start_position + alpha * end_position
-            trajectory.append(target_position)
-
-        return np.array(trajectory)
-
-    
     def reset_model(self):
         self.step_number = 0
-        pos = self.init_pos
-        vel = self.init_vel
-        self.set_state(pos, vel)
+        self.current_target_idx = 0
+
+        # Reset to initial position with small random noise
+        noise_scale = 0.01
+        self.init_pos = self.initial_joint_positions + np.random.uniform(
+            -noise_scale,
+            noise_scale,
+            size=self.model.nq
+        )
+        self.init_vel = np.zeros(self.model.nv)
+
+        self.set_state(self.init_pos, self.init_vel)
         return self._get_obs()
 
+    def get_reward(self):
+        ee_pos = self.data.body("end_effector").xpos
+        current_target = self.path[self.current_target_idx]
+
+        # 1. Path Following Reward
+        distance_to_path = np.linalg.norm(ee_pos - current_target)
+        path_reward = -8.0 * distance_to_path  # Base penalty for distance from target
+
+        # 2. Smooth Motion Reward
+        ee_velocity = self.data.body("end_effector").cvel[3:6]  # Linear velocity of end effector
+        velocity_magnitude = np.linalg.norm(ee_velocity)
+        desired_velocity = 5.0  # Desired constant velocity magnitude
+        velocity_reward = -3.0 * abs(velocity_magnitude - desired_velocity)
+
+        # 3. Progress Reward
+        if distance_to_path < 0.03:  # Threshold for considering a point reached
+            progress_reward = 30.0
+        else:
+            progress_reward = 0.0
+
+        # Combine all rewards
+        total_reward = path_reward + velocity_reward + progress_reward
+        return total_reward
+
     def step(self, action):
-        # Apply action to the robot's control inputs (actuators)
-        self.data.ctrl[:] = action  # Set the action to the control inputs (assuming action is joint torques/velocities)
-        
-        # Perform the simulation with the action
+        """Apply position control by setting joint positions (action)."""
+        self.data.ctrl[:] = action
         self.do_simulation(action, self.frame_skip)
-        
-        # Increment the step number
         self.step_number += 1
-        
-        # Get the new observation
+
         obs = self._get_obs()
-        
-        # Calculate reward
         reward = self.get_reward()
-        
-        # Check if episode is done
-        done = self.is_done()
-        
-        # Check if episode is truncated
+        done = False  # Always false to ensure the loop continues
         truncated = self._is_truncated()
-        
+
+        # Update target if the end effector is close to the current path target
+        if np.linalg.norm(self.data.body("end_effector").xpos - self.path[self.current_target_idx]) < 0.05:
+            # Move to the next point on the path, wrapping back to the start if at the end
+            self.current_target_idx = (self.current_target_idx + 1) % self.num_points
+
+        # Update visualization (if enabled)
+        if self.render_mode == "human":
+            self.render()
+
         return obs, reward, done, truncated, self._get_info()
 
-
     def is_done(self):
-        return self.step_number >= self.episode_len
+        """Override this function to prevent termination based on height."""
+        return False  # Prevent the episode from terminating early
 
     def _is_truncated(self):
         return self.step_number >= self.episode_len
 
-    def get_reward(self):
-        # Get current joint states
-        current_position = np.array([self.data.joint("joint_" + str(i+1)).qpos for i in range(6)])
-        current_velocity = np.array([self.data.joint("joint_" + str(i+1)).qvel for i in range(6)])
-        current_acceleration = np.array([self.data.joint("joint_" + str(i+1)).qacc for i in range(6)])
-        
-        # Define the target for the current time step
-        target_position = self.trajectory[min(self.step_number, self.episode_len - 1)]
-        
-        # Position Penalty (penalize deviation from the target position)
-        pos_penalty = -np.sum(np.abs(current_position - target_position))*10
-        
-        # Velocity Penalty (penalize deviation from zero velocity)
-        vel_penalty = -np.sum(np.abs(current_velocity))
-        
-        # Acceleration Penalty (penalize deviation from zero acceleration)
-        acc_penalty = -np.sum(np.abs(current_acceleration))
-        
-        # Path Reward: Reward for staying on path (closer to the target position)
-        path_reward = -np.sum(np.abs(current_position - target_position))*30
-        
-        # Total reward, normalizing and clipping to maintain stability
-        reward = (pos_penalty + vel_penalty + acc_penalty + path_reward)
-        return reward
-
     def _get_info(self):
-        return {}
-
-
+        return {
+            'end_effector_height': self.data.body("end_effector").xpos[2],
+            'initial_height': self.initial_ee_height,
+            'joint_velocities': self.data.qvel.copy(),
+            'current_target_idx': self.current_target_idx,
+            'distance_to_target': np.linalg.norm(self.data.body("end_effector").xpos - self.path[self.current_target_idx])
+        }

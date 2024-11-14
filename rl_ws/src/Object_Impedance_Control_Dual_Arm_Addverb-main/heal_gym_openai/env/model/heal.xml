@@ -1,8 +1,9 @@
 <mujoco model="heal">
    <compiler angle="radian" inertiafromgeom="false" discardvisual="false" meshdir="meshes/" />
    <!-- Disable gravity by setting it to 0 0 0 -->
-   <option timestep="0.002" gravity="0 0 -9.81" />
-  
+   <option timestep="0.002" gravity="0 0 0" />
+   <option timestep="0.002" solver="PGS" />
+
    <asset>
       <mesh name="base_link" file="base_link.STL" />
       <mesh name="link_1" file="link_1.STL" />
