@@ -1,0 +1,8 @@
+prefix=/home/tamizhanban/Documents/ITR/owl_ws/devel
+
+Name: my_owl_codes
+Description: Description of my_owl_codes
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

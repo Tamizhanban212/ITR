@@ -11,6 +11,7 @@ subdirs("orangewood_sim_stack/owl/moveit_pkgs/owl_65_robotiq_2f_85_moveit_config
 subdirs("orangewood_sim_stack/owl/moveit_pkgs/owl_65_vaccum_moveit_config")
 subdirs("orangewood_sim_stack/owl/owl_bringup")
 subdirs("orangewood_sim_stack/owl/moveit_pkgs/owl_moveit_bringup")
+subdirs("orangewood_sim_stack/owl/my_owl_codes")
 subdirs("orangewood_sim_stack/3rd_party_pkgs/timed_roslaunch")
 subdirs("orangewood_sim_stack/3rd_party_pkgs/object_msgs")
 subdirs("orangewood_sim_stack/3rd_party_pkgs/gazebo_test_tools")
