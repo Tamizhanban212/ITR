@@ -138,12 +138,18 @@ class HealEnv(MujocoEnv):
         self.frame_skip = configur.getint('Default', 'skip_frame')
         self.observation_space = Box(low=-np.inf, high=np.inf, shape=(18,), dtype=np.float64)
         MujocoEnv.__init__(self, os.path.abspath(os.path.join(path, rend_path)), self.frame_skip, self.observation_space, render_mode=render_mode)
-        
+
+        # Disable gravity by setting it to zero for faster RL training
+        self.model.opt.gravity[:] = 0
+
         self.step_number = 0
         self.episode_len = configur.getint('Default', 'episode_len')
         self.init_pos = np.zeros(6)
         self.init_vel = np.zeros(6)
-        self.target_joint_state = np.array([0.5, 0.5, 0.0, 0.0, 0.5, 0.0])  # Target positions for the last two joints
+        
+        # Define a time-dependent trajectory as a list of joint positions over time
+        self.trajectory = self.generate_trajectory()
+        
         self.min_action = configur.getfloat('Default', 'min_action')
         self.max_action = configur.getfloat('Default', 'max_action')
 
@@ -165,6 +171,22 @@ class HealEnv(MujocoEnv):
             observation[12+i] = self.data.joint("joint_" + str(i+1)).qacc
         return observation
 
+    def generate_trajectory(self):
+        """Generates a straight-line trajectory within the C-space."""
+        start_position = self.init_pos  # Starting joint position (e.g., all zeros)
+        end_position = np.array([0.5, 0.5, 0.0, 0.0, 0.5, 0.0])  # Target end position in C-space
+        num_steps = self.episode_len
+
+        # Create a straight line trajectory in joint space by interpolating between start and end positions
+        trajectory = []
+        for t in range(num_steps):
+            alpha = t / (num_steps - 1)  # Interpolation factor from 0 to 1
+            target_position = (1 - alpha) * start_position + alpha * end_position
+            trajectory.append(target_position)
+
+        return np.array(trajectory)
+
+    
     def reset_model(self):
         self.step_number = 0
         pos = self.init_pos
@@ -182,25 +204,37 @@ class HealEnv(MujocoEnv):
         return obs, reward, done, truncated, self._get_info()
 
     def is_done(self):
-        info = self._get_info()
-        loss = info.get("loss", 1.0)  # Default to 1.0 if loss is not found
-        return np.abs(loss) < 1
+        return self.step_number >= self.episode_len
 
     def _is_truncated(self):
-        info = self._get_info()
-        loss = info.get("loss", 1.0)  # Default to 1.0 if loss is not found
-        return np.abs(loss) < 1
+        return self.step_number >= self.episode_len
 
     def get_reward(self):
-        current_joint_state = np.array([self.data.joint("joint_" + str(i+1)).qpos for i in range(6)])
-        diff = np.abs(current_joint_state - self.target_joint_state)
-        reward = -np.sum(diff)  # Negative sum of differences between current and target states
+        # Get current joint states
+        current_position = np.array([self.data.joint("joint_" + str(i+1)).qpos for i in range(6)])
+        current_velocity = np.array([self.data.joint("joint_" + str(i+1)).qvel for i in range(6)])
+        current_acceleration = np.array([self.data.joint("joint_" + str(i+1)).qacc for i in range(6)])
         
-        # Normalizing the reward
-        reward = np.clip(reward / 6.0, -1, 1)
+        # Define the target for the current time step
+        target_position = self.trajectory[min(self.step_number, self.episode_len - 1)]
         
+        # Position Penalty (penalize deviation from the target position)
+        pos_penalty = -np.sum(np.abs(current_position - target_position))*10
+        
+        # Velocity Penalty (penalize deviation from zero velocity)
+        vel_penalty = -np.sum(np.abs(current_velocity))
+        
+        # Acceleration Penalty (penalize deviation from zero acceleration)
+        acc_penalty = -np.sum(np.abs(current_acceleration))
+        
+        # Path Reward: Reward for staying on path (closer to the target position)
+        path_reward = -np.sum(np.abs(current_position - target_position))*30
+        
+        # Total reward, normalizing and clipping to maintain stability
+        reward = (pos_penalty + vel_penalty + acc_penalty + path_reward)
         return reward
 
     def _get_info(self):
         return {}
+
 

@@ -58,7 +58,7 @@ model = PPO("MlpPolicy", vec_env, verbose=1, device="cuda")
 early_stopping_callback = EarlyStoppingCallback(check_freq=10000, threshold=0.1, verbose=1)
 
 # Train the model with the callback
-model.learn(total_timesteps=20000, callback=early_stopping_callback)
+model.learn(total_timesteps=50000, callback=early_stopping_callback)
 model.save("Heal")
 
 model = PPO.load("Heal")

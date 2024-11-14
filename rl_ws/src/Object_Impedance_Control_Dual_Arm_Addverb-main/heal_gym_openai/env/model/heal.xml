@@ -77,12 +77,45 @@
   </worldbody>
   
    <actuator>
-      <!-- Joint Control -->
-      <position name="turret" joint="joint_1" kp="100" forcelimited="true" forcerange="-100 100" />
-      <position name="shoulder" joint="joint_2" kp="100" forcelimited="true" forcerange="-100 100" />
-      <position name="elbow" joint="joint_3" kp="100" forcelimited="true" forcerange="-100 100" />
-      <position name="wrist_1" joint="joint_4" kp="100" forcelimited="true" forcerange="-100 100" />
-      <position name="wrist_2" joint="joint_5" kp="100" forcelimited="true" forcerange="-100 100" />
-      <position name="wrist_3" joint="joint_6" kp="100" forcelimited="true" forcerange="-100 100" />
+        <!-- Joint Control -->
+        <position name="turret" joint="joint_1" kp="100" forcelimited="true" forcerange="-10 10" />
+        <position name="shoulder" joint="joint_2" kp="100" forcelimited="true" forcerange="-10 10" />
+        <position name="elbow" joint="joint_3" kp="100" forcelimited="true" forcerange="-10 10" />
+        <position name="wrist_1" joint="joint_4" kp="100" forcelimited="true" forcerange="-10 10" />
+        <position name="wrist_2" joint="joint_5" kp="100" forcelimited="true" forcerange="-10 10" />
+        <position name="wrist_3" joint="joint_6" kp="100" forcelimited="true" forcerange="-10 10" />
    </actuator>
+
+   <!-- TORQUE CONTROL -->
+   <!-- <actuator>
+        <motor name="turret" joint="joint_1"/>
+        <motor name="shoulder" joint="joint_2"/>
+        <motor name="elbow" joint="joint_3"/>
+        <motor name="wrist_1" joint="joint_4"/>
+        <motor name="wrist_2" joint="joint_5"/>
+        <motor name="wrist_3" joint="joint_6"/>
+    </actuator> -->
+
+   <!-- VELOCITY CONTROL -->
+   <!-- <actuator>
+        <velocity name="turret_v" joint="joint_1" gear="1" forcelimited="true"
+        kv="1" forcerange="-10 10"
+        />
+        <velocity name="shoulder_v" joint="joint_2" gear="1" forcelimited="true"
+        kv="1" forcerange="-10 10"
+        />
+        <velocity name="elbow_v" joint="joint_3" gear="1" forcelimited="true"
+        kv="1" forcerange="-10 10"
+        />
+        <velocity name="wrist_1_v" joint="joint_4" gear="1" forcelimited="true"
+        kv="1" forcerange="-10 10"
+        />
+        <velocity name="wrist_2_v" joint="joint_5" gear="1" forcelimited="true"
+        kv="1" forcerange="-10 10"
+        />
+        <velocity name="wrist_3_v" joint="joint_6" gear="1" forcelimited="true"
+        kv="1" forcerange="-10 10"
+        />
+    </actuator> -->
+ 
 </mujoco>
