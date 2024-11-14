@@ -19,5 +19,5 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point="env.heal_env:HealEnv",
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=25000,
+    max_episode_steps=500,
 )

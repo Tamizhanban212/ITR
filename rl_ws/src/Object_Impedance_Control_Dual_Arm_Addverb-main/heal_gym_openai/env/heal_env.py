@@ -195,13 +195,29 @@ class HealEnv(MujocoEnv):
         return self._get_obs()
 
     def step(self, action):
+        # Apply action to the robot's control inputs (actuators)
+        self.data.ctrl[:] = action  # Set the action to the control inputs (assuming action is joint torques/velocities)
+        
+        # Perform the simulation with the action
         self.do_simulation(action, self.frame_skip)
+        
+        # Increment the step number
         self.step_number += 1
+        
+        # Get the new observation
         obs = self._get_obs()
+        
+        # Calculate reward
         reward = self.get_reward()
+        
+        # Check if episode is done
         done = self.is_done()
+        
+        # Check if episode is truncated
         truncated = self._is_truncated()
+        
         return obs, reward, done, truncated, self._get_info()
+
 
     def is_done(self):
         return self.step_number >= self.episode_len
