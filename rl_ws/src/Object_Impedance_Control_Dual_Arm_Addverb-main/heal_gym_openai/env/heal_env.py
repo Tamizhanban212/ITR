@@ -114,7 +114,6 @@
 #     def _get_info(self):
 #         return {}
 
-
 import numpy as np
 import os
 from gymnasium import utils
@@ -181,24 +180,29 @@ class HealEnv(MujocoEnv):
         self.initial_ee_height = self.data.body("end_effector").xpos[2]
         self.initial_joint_positions = self.data.qpos.copy()
 
-        # Define parameters for the circular path
-        self.path_radius = 0.8  # Define the radius of the circle
-        self.num_points = 2000  # Number of points along the path
-
-        # Generate the circular trajectory path
-        self.path = self.generate_circular_path(self.path_radius, self.num_points)
+        # Generate the triangular trajectory path
+        self.path = self.generate_triangle_path(0.01)
 
         self.num_points = len(self.path)  # Update number of points to be the length of the path
         self.current_target_idx = 0
 
-    def generate_circular_path(self, radius, num_points):
-        """Generates a circular path in the XY plane with a constant height."""
-        t_values = np.linspace(0, 2 * np.pi, num_points)
-        path = np.array([
-            [radius * np.cos(t), radius * np.sin(t), self.initial_ee_height]  # Z-coordinate stays constant
-            for t in t_values
-        ])
-        return path
+    def generate_triangle_path(self, side_length):
+        """Generates a small equilateral triangle path in the XY plane with a constant height."""
+        start_x = self.data.body("end_effector").xpos[0]
+        start_y = self.data.body("end_effector").xpos[1]
+        z = self.initial_ee_height
+
+        # Equilateral triangle vertices
+        A = np.array([start_x, start_y, z])
+        B = np.array([start_x + side_length, start_y, z])
+        C = np.array([start_x + 0.5 * side_length, start_y + np.sin(np.deg2rad(60)) * side_length, z])
+
+        # Points on the path (triangle perimeter)
+        path = np.linspace(A, B, self.episode_len//3).tolist()
+        path += np.linspace(B, C, self.episode_len//3).tolist()
+        path += np.linspace(C, A, self.episode_len//3).tolist()
+
+        return np.array(path)
 
     def _get_obs(self):
         """Returns the current state of the system, including joint positions and velocities."""
@@ -227,17 +231,17 @@ class HealEnv(MujocoEnv):
 
         # 1. Path Following Reward
         distance_to_path = np.linalg.norm(ee_pos - current_target)
-        path_reward = -8.0 * distance_to_path  # Base penalty for distance from target
+        path_reward = -10.0 * distance_to_path  # Base penalty for distance from target
 
         # 2. Smooth Motion Reward
         ee_velocity = self.data.body("end_effector").cvel[3:6]  # Linear velocity of end effector
         velocity_magnitude = np.linalg.norm(ee_velocity)
-        desired_velocity = 5.0  # Desired constant velocity magnitude
-        velocity_reward = -3.0 * abs(velocity_magnitude - desired_velocity)
+        desired_velocity = 8.0  # Desired constant velocity magnitude
+        velocity_reward = -5.0 * abs(velocity_magnitude - desired_velocity)
 
         # 3. Progress Reward
-        if distance_to_path < 0.03:  # Threshold for considering a point reached
-            progress_reward = 30.0
+        if distance_to_path < 0.05:  # Threshold for considering a point reached
+            progress_reward = 50.0
         else:
             progress_reward = 0.0
 
