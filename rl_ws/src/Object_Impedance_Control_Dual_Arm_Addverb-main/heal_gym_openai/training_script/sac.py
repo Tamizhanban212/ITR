@@ -42,7 +42,7 @@ model = PPO(
     verbose=2)
 
 # Train for more timesteps
-model.learn(total_timesteps=500,log_interval=10)  # Increased timesteps
+model.learn(total_timesteps=5000000,log_interval=10)  # Increased timesteps
 
 model.save("heal_spiral")
 
