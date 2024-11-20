@@ -1,8 +1,78 @@
-
+#!/usr/bin/env python3
 import cv2
 import numpy as np
 import random
 from collections import Counter
+import rospy
+from open_manipulator_msgs.srv import SetKinematicsPose, SetKinematicsPoseRequest, SetJointPosition, SetJointPositionRequest
+from geometry_msgs.msg import Pose, Point, Quaternion
+import tf.transformations as tf_tr
+import math
+
+def euler_to_quaternion(roll, pitch, yaw):
+    roll = math.radians(roll)
+    pitch = math.radians(pitch)
+    yaw = math.radians(yaw)
+    return Quaternion(*tf_tr.quaternion_from_euler(roll, pitch, yaw))
+
+def control_gripper(position):
+    rospy.wait_for_service('/goal_tool_control')
+    try:
+        tool_control = rospy.ServiceProxy('/goal_tool_control', SetJointPosition)
+        request = SetJointPositionRequest()
+        request.joint_position.joint_name = ["gripper"]
+        request.joint_position.position = [position]
+        tool_control(request)
+    except rospy.ServiceException as e:
+        rospy.logerr("Service call failed: %s", e)
+
+def compute_orientation(x, y, z):
+    if z > 0.15:
+        return (0, 0, 0)
+    return (0, 80, 0)
+
+def send_pose(poses):
+    rospy.init_node('pose_gripper_control_node', anonymous=True)
+    rospy.wait_for_service('/goal_task_space_path')
+    set_pose = rospy.ServiceProxy('/goal_task_space_path', SetKinematicsPose)
+
+    for position, gripper_state, delay in poses:
+        x, y, z = position
+        orientation = compute_orientation(x, y, z)
+        pose = Pose(position=Point(x, y, z), orientation=euler_to_quaternion(*orientation))
+        
+        try:
+            kinematics_pose = SetKinematicsPoseRequest()
+            kinematics_pose.kinematics_pose.pose = pose
+            kinematics_pose.planning_group = "arm"
+            kinematics_pose.end_effector_name = "gripper"
+            kinematics_pose.path_time = 2
+            set_pose(kinematics_pose)
+            rospy.sleep(delay)
+            if gripper_state != "unchanged":
+                control_gripper(0.01 if gripper_state == "open" else -0.01)
+        except rospy.ServiceException as e:
+            rospy.logerr("Service call failed: %s", e)
+        rospy.sleep(2)
+
+def generate_poses(from_position, to_position):
+    """
+    Generate a sequence of poses to move from one position to another.
+    """
+    x_from, y_from = from_position
+    x_to, y_to = to_position
+    return [
+        ((0.08, 0.0, 0.25), "open", 0.2),   # Move to initial hover position
+        ((x_from, y_from, 0.15), "open", 0.2),  # Move above the 'from' position
+        ((x_from, y_from, 0.05), "open", 0.2),  # Move to the 'from' position
+        ((x_from, y_from, 0.05), "close", 0.2), # Close gripper at 'from'
+        ((x_from, y_from, 0.12), "close", 0.2), # Lift from the 'from' position
+        ((x_to, y_to, 0.15), "close", 0.2),     # Move above the 'to' position
+        ((x_to, y_to, 0.08), "close", 0.2),     # Move to the 'to' position
+        ((x_to, y_to, 0.08), "open", 0.2),      # Open gripper at 'to'
+        ((x_to, y_to, 0.15), "open", 0.2),      # Lift from the 'to' position
+        ((0.08, 0.0, 0.25), "open", 0.2),   # Return to hover position
+    ]
 
 # Global dictionary to store detected shapes
 shapes_dict = {}
@@ -233,8 +303,8 @@ def transform_centroids_to_meters(grouped_shapes):
         xpx, ypx = centroid_px
 
         # Apply transformation equations
-        xm = ypx * 0.00556 + 3
-        ym = (xpx - 443) * 0.00566
+        xm = ypx * 0.000556 + 0.055
+        ym = (xpx - 440) * 0.000556
 
         # Store the transformed centroids in meters
         transformed_shapes[key] = [color, [xm, ym]]
@@ -362,7 +432,8 @@ def main():
         if "place" in command.lower() and "on top of" in command.lower():
             from_coord, to_coord = process_place_command_simple(command, transformed_grouped_shapes)
             if from_coord and to_coord:
-                print(f"Action required: Move from {from_coord} to {to_coord}.")
+                poses = generate_poses(from_coord, to_coord)
+                send_pose(poses)
         else:
             print("Command not recognized. Try again.")
 

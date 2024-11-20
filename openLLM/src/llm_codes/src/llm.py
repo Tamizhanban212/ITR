@@ -5,10 +5,10 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 import tf.transformations as tf_tr
 import math
 import speech_recognition as sr
-import openai
+from transformers import pipeline
 
-# Configure OpenAI API key
-openai.api_key = "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"
+# Load a Hugging Face pipeline for natural language understanding
+classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 def euler_to_quaternion(roll, pitch, yaw):
     roll = math.radians(roll)
@@ -58,16 +58,12 @@ def recognize_speech_and_respond():
                 speech_text = recognizer.recognize_google(audio)
                 rospy.loginfo(f"Recognized: {speech_text}")
 
-                # Analyze speech with OpenAI's API
-                response = openai.Completion.create(
-                    engine="text-davinci-003",
-                    prompt=f"Does the following text indicate a command to go to home position? Text: {speech_text}",
-                    max_tokens=10,
-                )
-                result = response.choices[0].text.strip().lower()
-                rospy.loginfo(f"AI Response: {result}")
+                # Use Hugging Face model for command classification
+                candidate_labels = ["move to home position", "ignore"]
+                result = classifier(speech_text, candidate_labels)
+                rospy.loginfo(f"Classification result: {result}")
 
-                if "yes" in result:
+                if result["labels"][0] == "move to home position" and result["scores"][0] > 0.8:
                     send_home_pose()
                 else:
                     rospy.loginfo("No action taken.")
