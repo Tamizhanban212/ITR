@@ -50,7 +50,9 @@ def detect_blocks(frame):
     return frame, detected_blocks
 
 # Initialize webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)  # Use the correct index for your camera
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)  # Set width
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)  # Set height
 
 if not cap.isOpened():
     print("Error: Could not open webcam.")
