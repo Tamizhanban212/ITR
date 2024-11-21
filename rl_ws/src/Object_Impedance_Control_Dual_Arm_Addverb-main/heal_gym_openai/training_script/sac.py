@@ -71,19 +71,19 @@ checkpoint_callback = CheckpointCallback(
 )
 
 
-model = PPO.load("infinity_robot_vectorized_training", env=vec_env, tensorboard_log="./tensorboard_logs/")
+# model = PPO.load("infinity_robot_vectorized_training", env=vec_env, tensorboard_log="./tensorboard_logs/")
 
-checkpoint_callback = CheckpointCallback(
-    save_freq=50000,
-    save_path="./logs/",
-    name_prefix="infinity_model_continued"
-)
+# checkpoint_callback = CheckpointCallback(
+#     save_freq=50000,
+#     save_path="./logs/",
+#     name_prefix="infinity_model_continued"
+# )
 
 
 # Train for longer (1 million steps)
 print("Starting training...")
 model.learn(
-    total_timesteps=50_000_000,
+    total_timesteps=1_000_000,
     callback=checkpoint_callback,
     progress_bar=True,
     log_interval=5,
