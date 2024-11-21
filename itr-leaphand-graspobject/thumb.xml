@@ -18,9 +18,9 @@
 
   <worldbody>
     <body name="palm" pos="0 0 0">
-    <geom name="palm" pos="-0.045207 -0.0369862 -0.014764" type="mesh" rgba="0.603922 0.14902 0.14902 1" mesh="palm_lower"/>
+    <geom name="palm" pos="0.025112 0.062744 -0.023246" type="mesh" rgba="0.603922 0.14902 0.14902 1" mesh="palm_lower"/>
     <!-- <body name="pip_4" pos="-0.0693952 -0.00124224 -0.0216224" quat="0.707107 0 0.707107 0"> -->
-    <body name="pip_4" pos="-0.07649045 0.02181556 -0.0403448" quat="0.707107 0 0.707107 0">
+    <body name="pip_4" pos="-0.03128345 0.05880176 -0.0255808" quat="0.707107 0 0.707107 0">
         <joint name="12" pos="0 0 0" axis="0 0 -1" range="-0.349 2.094" damping="0.1" limited="true"/>
         <geom pos="-0.00535664 0.0003 0.000784034" quat="0.5 -0.5 -0.5 -0.5" type="mesh" rgba="0.74902 0.74902 0.74902 1" mesh="pip"/>
         <body name="thumb_pip_4" pos="0 0.0143 -0.013" quat="0.5 0.5 -0.5 0.5">
