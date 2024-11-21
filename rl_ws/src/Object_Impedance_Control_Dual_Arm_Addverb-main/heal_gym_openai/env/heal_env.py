@@ -66,8 +66,8 @@ class HealEnv(MujocoEnv):
 
         # Define parameters for the round-trip path
         self.num_points = 4000  # Number of points along the path
-        start_point = np.array([-0.3, 0.0, self.initial_ee_height - 0.2])  # Starting position in XYZ
-        mid_point = np.array([0.3, 0.0, self.initial_ee_height - 0.2])  # Mid-point in XYZ
+        start_point = np.array([-0.5, 0.0, self.initial_ee_height - 0.2])  # Starting position in XYZ
+        mid_point = np.array([0.5, 0.0, self.initial_ee_height - 0.2])  # Mid-point in XYZ
         end_point = start_point  # Returning to the home position
 
         # Generate the round-trip trajectory

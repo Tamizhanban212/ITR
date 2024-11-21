@@ -4,79 +4,96 @@ from stable_baselines3 import PPO
 import registration
 
 # Define the new target trajectory
-def generate_new_target_trajectory(start_point, end_point, num_points):
-    """
-    Generates a straight-line trajectory in 3D space.
-    Args:
-        start_point (np.ndarray): Starting position in 3D space.
-        end_point (np.ndarray): Ending position in 3D space.
-        num_points (int): Number of points in the trajectory.
-    Returns:
-        np.ndarray: Array of 3D points representing the trajectory.
-    """
-    return np.linspace(start_point, end_point, num_points)
+# def generate_new_target_trajectory(start_point, end_point, num_points):
+#     """
+#     Generates a straight-line trajectory in 3D space.
+#     Args:
+#         start_point (np.ndarray): Starting position in 3D space.
+#         end_point (np.ndarray): Ending position in 3D space.
+#         num_points (int): Number of points in the trajectory.
+#     Returns:
+#         np.ndarray: Array of 3D points representing the trajectory.
+#     """
+#     return np.linspace(start_point, end_point, num_points)
 
-# Define the start and end points for the new trajectory
-start_point = np.array([-1, 0.0, 0.8])  # Adjust these based on the task/environment
-end_point = np.array([1, 0.0, 0.8])
-num_points = 2000
-new_trajectory = generate_new_target_trajectory(start_point, end_point, num_points)
+# # Define the start and end points for the new trajectory
+# start_point = np.array([-1, 0.0, 0.8])  # Adjust these based on the task/environment
+# end_point = np.array([1, 0.0, 0.8])
+# num_points = 2000
+# new_trajectory = generate_new_target_trajectory(start_point, end_point, num_points)
 
 # Load the trained model
 model_path = "infinity_robot_vectorized_training"
 model = PPO.load(model_path)
 
-# Load the real environment
-env = gym.make("Heal-v1", render_mode="human")
+# Evaluation loop
+eval_env = gym.make("Heal-v1", render_mode="human")
+obs, _ = eval_env.reset()
 
-# Reset the environment and extract the initial observation
-obs, _ = env.reset()
-
-# Move along the new trajectory
-target_reached = False
-total_rewards = 0
-steps = 0
-
-print("Evaluating the model on the new target trajectory...")
+print("Press Ctrl+C to stop evaluation")
 try:
-    for target_point in new_trajectory:
-        while True:
-            # Predict the action based on the observation
-            action, _ = model.predict(obs, deterministic=True)
-
-            # Perform the action
-            obs, reward, terminated, truncated, info = env.step(action)
-
-            # Render the environment
-            env.render()
-
-            # Access the end-effector position
-            current_end_effector_position = env.unwrapped.data.body("end_effector").xpos[:3]
-
-            # Compute the distance to the target point
-            distance_to_target = np.linalg.norm(current_end_effector_position - target_point)
-
-            # Update metrics
-            total_rewards += reward
-            steps += 1
-
-            # Check if the end-effector has reached the current target point
-            if distance_to_target < 0.05:
-                print(f"Reached target point: {target_point}, Current Position: {current_end_effector_position}")
-                break
-
-            # If the episode ends, reset the environment
-            if terminated or truncated:
-                print(f"Episode terminated early. Total rewards: {total_rewards}, Steps: {steps}")
-                obs, _ = env.reset()
-                total_rewards = 0
-                steps = 0
-
+    while True:
+        action, _states = model.predict(obs, deterministic=True)
+        obs, rewards, terminated, truncated, info = eval_env.step(action)
+        
+        if terminated or truncated:
+            obs, _ = eval_env.reset()
+        eval_env.render()
 except KeyboardInterrupt:
-    print("\nEvaluation interrupted by user.")
+    print("\nEvaluation stopped by user")
+finally:
+    eval_env.close()
+# # Load the real environment
+# env = gym.make("Heal-v1", render_mode="human")
 
-# Close the environment
-env.close()
+# # Reset the environment and extract the initial observation
+# obs, _ = env.reset()
+
+# # Move along the new trajectory
+# target_reached = False
+# total_rewards = 0
+# steps = 0
+
+# print("Evaluating the model on the new target trajectory...")
+# try:
+#     for target_point in new_trajectory:
+#         while True:
+#             # Predict the action based on the observation
+#             action, _ = model.predict(obs, deterministic=True)
+
+#             # Perform the action
+#             obs, reward, terminated, truncated, info = env.step(action)
+
+#             # Render the environment
+#             env.render()
+
+#             # Access the end-effector position
+#             current_end_effector_position = env.unwrapped.data.body("end_effector").xpos[:3]
+
+#             # Compute the distance to the target point
+#             distance_to_target = np.linalg.norm(current_end_effector_position - target_point)
+
+#             # Update metrics
+#             total_rewards += reward
+#             steps += 1
+
+#             # Check if the end-effector has reached the current target point
+#             if distance_to_target < 0.05:
+#                 print(f"Reached target point: {target_point}, Current Position: {current_end_effector_position}")
+#                 break
+
+#             # If the episode ends, reset the environment
+#             if terminated or truncated:
+#                 print(f"Episode terminated early. Total rewards: {total_rewards}, Steps: {steps}")
+#                 obs, _ = env.reset()
+#                 total_rewards = 0
+#                 steps = 0
+
+# except KeyboardInterrupt:
+#     print("\nEvaluation interrupted by user.")
+
+# # Close the environment
+# env.close()
 
 
 
