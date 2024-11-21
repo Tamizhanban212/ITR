@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 
 #write your own library with TransMatrix and OnlyPosIK classes as required 
-from main_redundancy import TransMatrix, OnlyPosIK
+from IK_bro import TransMatrix, OnlyPosIK
 
 from main import LeapNode
 import time
