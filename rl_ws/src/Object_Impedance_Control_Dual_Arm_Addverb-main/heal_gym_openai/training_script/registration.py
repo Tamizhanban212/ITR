@@ -7,7 +7,7 @@ import os
 import sys 
 import gymnasium as gym 
 import numpy as np
-sys.path.append('/home/tamizhanban/Documents/ITR/rl_ws/src/Object_Impedance_Control_Dual_Arm_Addverb-main/heal_gym_openai')
+sys.path.append('/home/aarav/ITR/rl_ws/src/Object_Impedance_Control_Dual_Arm_Addverb-main/heal_gym_openai')
 
 from env.heal_env import HealEnv
 

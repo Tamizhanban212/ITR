@@ -64,24 +64,24 @@ class HealEnv(MujocoEnv):
         self.initial_ee_height = self.data.body("end_effector").xpos[2]
         self.initial_joint_positions = self.data.qpos.copy()
 
-        # Define parameters for the circular path
-        self.path_radius = 0.8  # Define the radius of the circle
-        self.num_points = 2000  # Number of points along the path
+        # Define parameters for the round-trip path
+        self.num_points = 4000  # Number of points along the path
+        start_point = np.array([-0.3, 0.0, self.initial_ee_height - 0.2])  # Starting position in XYZ
+        mid_point = np.array([0.3, 0.0, self.initial_ee_height - 0.2])  # Mid-point in XYZ
+        end_point = start_point  # Returning to the home position
 
-        # Generate the circular trajectory path
-        self.path = self.generate_circular_path(self.path_radius, self.num_points)
+        # Generate the round-trip trajectory
+        self.path = self.generate_round_trip_path(start_point, mid_point, end_point, self.num_points)
 
         self.num_points = len(self.path)  # Update number of points to be the length of the path
         self.current_target_idx = 0
 
-    def generate_circular_path(self, radius, num_points):
-        """Generates a circular path in the XY plane with a constant height."""
-        t_values = np.linspace(0, 2 * np.pi, num_points)
-        path = np.array([
-            [radius * np.cos(t), radius * np.sin(t), self.initial_ee_height]  # Z-coordinate stays constant
-            for t in t_values
-        ])
-        return path
+    def generate_round_trip_path(self, start_point, mid_point, end_point, num_points):
+        """Generates a round-trip path in 3D space: start -> mid -> home."""
+        half_points = num_points // 2  # Half the points for each leg of the trip
+        path_to_mid = np.linspace(start_point, mid_point, half_points)
+        path_to_end = np.linspace(mid_point, end_point, half_points)
+        return np.concatenate([path_to_mid, path_to_end], axis=0)
 
     def _get_obs(self):
         """Returns the current state of the system, including joint positions and velocities."""
@@ -166,13 +166,6 @@ class HealEnv(MujocoEnv):
             'distance_to_target': np.linalg.norm(self.data.body("end_effector").xpos - self.path[self.current_target_idx])
         }
 
-
-# import numpy as np
-# import os
-# from gymnasium import utils
-# from gymnasium.spaces import Box
-# from gymnasium.envs.mujoco import MujocoEnv
-# from configparser import ConfigParser
 
 # class HealEnv(MujocoEnv):
 #     metadata = {
